@@ -14,8 +14,6 @@ namespace EventManager.API.Installers
             services.AddDbContext<DataContext> (options =>
                 options.UseSqlServer (
                     configuration.GetConnectionString ("DefaultConnection")));
-            services.AddDefaultIdentity<IdentityUser> ()
-                .AddEntityFrameworkStores<DataContext> ();
         }
     }
 }

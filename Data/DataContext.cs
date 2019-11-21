@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.API.Data
 {
-    public class DataContext : IdentityDbContext
+    public class DataContext : DbContext
     {
-        public DataContext(DbContextOptions<DataContext> options)
-            : base(options)
-        {
-        }
+        public DataContext (DbContextOptions<DataContext> options) : base (options)
+        {}
     }
 }
