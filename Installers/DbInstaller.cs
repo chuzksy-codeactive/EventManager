@@ -1,5 +1,5 @@
 using EventManager.API.Data;
-
+using EventManager.API.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +14,7 @@ namespace EventManager.API.Installers
             services.AddDbContext<DataContext> (options =>
                 options.UseSqlServer (
                     configuration.GetConnectionString ("DefaultConnection")));
+            services.AddScoped<IUserRepository, UserRepository>();
         }
     }
 }

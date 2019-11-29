@@ -12,6 +12,7 @@ namespace EventManager.API.Domain.Entities
             Facilities = new HashSet<Facility> ();
             Events = new HashSet<Event> ();
         }
+
         public Guid CenterId { get; set; }
         public string Name { get; set; }
         public int HallCapacity { get; set; }

@@ -9,6 +9,7 @@ namespace EventManager.API.Domain.Entities
         {
             Users = new HashSet<User> ();
         }
+
         public Guid Id { get; set; }
         public string Name { get; set; }
         public string Purpose { get; set; }
