@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Text;
-
 using EventManager.API.Options;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;

@@ -1,3 +1,5 @@
+using System;
+using AutoMapper;
 using EventManager.API.Data;
 using EventManager.API.Services;
 using Microsoft.AspNetCore.Identity;
@@ -15,6 +17,7 @@ namespace EventManager.API.Installers
                 options.UseSqlServer (
                     configuration.GetConnectionString ("DefaultConnection")));
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
     }
 }
