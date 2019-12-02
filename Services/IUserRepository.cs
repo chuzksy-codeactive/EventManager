@@ -7,10 +7,10 @@ namespace EventManager.API.Services
 {
     public interface IUserRepository
     {
+        Task<bool> SaveChangesAsync ();
+        bool UserExists(string username, string email);
         Task<IEnumerable<User>> GetUsersAsync ();
         void AddUser (User user);
-        Task<bool> SaveChangesAsync ();
-
-        bool UserExists(string username, string email);
+        Task<User> AuthenticateUserAsync (string username, string password);
     }
 }

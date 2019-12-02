@@ -38,14 +38,26 @@ namespace EventManager.API.Services
             return await _dataContext.Users.ToListAsync ();
         }
 
+        public async Task<User> AuthenticateUserAsync (string username, string password)
+        {
+            var user = await _dataContext.Users.SingleOrDefaultAsync (x => x.Username == username || x.Email == username);
+
+            if (user == null) return null;
+
+            var isUserAuthenticated = BCrypt.Net.BCrypt.Verify (password, user.Password);
+
+            if (!isUserAuthenticated) return null;
+
+            return user;
+        }
         public async Task<bool> SaveChangesAsync ()
         {
             return (await _dataContext.SaveChangesAsync () > 0);
         }
 
-        public bool UserExists(string username, string email)
+        public bool UserExists (string username, string email)
         {
-            return _dataContext.Users.Any(u => u.Username == username || u.Email == email);
+            return _dataContext.Users.Any (u => u.Username == username || u.Email == email);
         }
 
         public void Dispose ()

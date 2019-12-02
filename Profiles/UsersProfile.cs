@@ -16,6 +16,10 @@ namespace EventManager.API.Profiles
                 .ForMember (
                     dest => dest.Email,
                     opt => opt.MapFrom (src => src.Email));
+            CreateMap<User, UserForAuthenticationDto>()
+                .ForMember(
+                    dest => dest.User,
+                    opt => opt.MapFrom (src => $"{src.Firstname} {src.Lastname}"));
             CreateMap<UserForCreationDto, User>();
         }
     }
