@@ -1,8 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 using AutoMapper;
+using EventManager.API.Domain.Validators;
+using EventManager.API.Models;
 using EventManager.API.Options;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -65,7 +70,9 @@ namespace EventManager.API.Installers
                     }
                 });
             });
-            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            services.AddAutoMapper (AppDomain.CurrentDomain.GetAssemblies ());
+            services.AddMvc ().AddFluentValidation (config => config.RegisterValidatorsFromAssemblyContaining<Startup> ());
+            services.AddTransient<IValidator<UserForCreationDto>, UserForCreationDtoValidator>();
         }
     }
 }
