@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
+using AutoMapper;
 using EventManager.API.Options;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -63,6 +65,7 @@ namespace EventManager.API.Installers
                     }
                 });
             });
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
         }
     }
 }

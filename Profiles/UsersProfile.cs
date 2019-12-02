@@ -16,6 +16,7 @@ namespace EventManager.API.Profiles
                 .ForMember (
                     dest => dest.Email,
                     opt => opt.MapFrom (src => src.Email));
+            CreateMap<UserForCreationDto, User>();
         }
     }
 }

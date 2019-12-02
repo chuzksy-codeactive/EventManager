@@ -10,5 +10,7 @@ namespace EventManager.API.Services
         Task<IEnumerable<User>> GetUsersAsync ();
         void AddUser (User user);
         Task<bool> SaveChangesAsync ();
+
+        bool UserExists(string username, string email);
     }
 }

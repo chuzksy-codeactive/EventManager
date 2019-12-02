@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using EventManager.API.Data;
@@ -22,9 +23,14 @@ namespace EventManager.API.Services
             _logger = logger ??
                 throw new ArgumentNullException (nameof (logger));
         }
-        public void AddUser (User user)
+        public void AddUser (User userToAdd)
         {
-            throw new NotImplementedException ();
+            if (userToAdd == null)
+            {
+                throw new ArgumentNullException (nameof (userToAdd));
+            }
+
+            _dataContext.Add (userToAdd);
         }
 
         public async Task<IEnumerable<User>> GetUsersAsync ()
@@ -35,6 +41,11 @@ namespace EventManager.API.Services
         public async Task<bool> SaveChangesAsync ()
         {
             return (await _dataContext.SaveChangesAsync () > 0);
+        }
+
+        public bool UserExists(string username, string email)
+        {
+            return _dataContext.Users.Any(u => u.Username == username || u.Email == email);
         }
 
         public void Dispose ()

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using AutoMapper;
+using EventManager.API.Domain.Entities;
 using EventManager.API.Models;
 using EventManager.API.Services;
 
@@ -27,11 +28,30 @@ namespace EventManager.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUserAsync ()
+        public async Task<IActionResult> GetUsers ()
         {
             var userEntities = await _userRepository.GetUsersAsync ();
 
-            return Ok (_mapper.Map<IEnumerable<UserDto>>(userEntities));
+            return Ok (_mapper.Map<IEnumerable<UserDto>> (userEntities));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddUser ([FromBody] UserForCreationDto userForCreation)
+        {
+            if(_userRepository.UserExists(userForCreation.Username, userForCreation.Email))
+            {
+                throw new Exception("User already exists");
+            }
+            var userEntity = _mapper.Map<User>(userForCreation);
+
+            userEntity.Password = BCrypt.Net.BCrypt.HashPassword(userEntity.Password);
+
+            _userRepository.AddUser(userEntity);
+            await _userRepository.SaveChangesAsync();
+
+            var userToReturn = _mapper.Map<UserDto>(userEntity);
+
+            return Ok(userToReturn);
         }
     }
 }
