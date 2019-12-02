@@ -50,6 +50,15 @@ namespace EventManager.API.Services
 
             return user;
         }
+
+        public async Task<User> GetUserByIdAsync (Guid userId)
+        {
+            var user = await _dataContext.Users.FindAsync(userId);
+
+            if (user == null) return null;
+
+            return user;
+        }
         public async Task<bool> SaveChangesAsync ()
         {
             return (await _dataContext.SaveChangesAsync () > 0);

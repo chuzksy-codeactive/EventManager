@@ -10,13 +10,14 @@ using AutoMapper;
 using EventManager.API.Domain.Entities;
 using EventManager.API.Models;
 using EventManager.API.Services;
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace EventManager.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route ("api/users")]
     public class UsersController : ControllerBase
@@ -43,7 +44,8 @@ namespace EventManager.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddUser ([FromBody] UserForCreationDto userForCreation)
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateUser ([FromBody] UserForCreationDto userForCreation)
         {
             if (_userRepository.UserExists (userForCreation.Username, userForCreation.Email))
             {
@@ -58,10 +60,11 @@ namespace EventManager.API.Controllers
 
             var userToReturn = _mapper.Map<UserDto> (userEntity);
 
-            return Ok (userToReturn);
+            return CreatedAtRoute ("GetUserById", new { userId = userEntity.Id }, userToReturn);
         }
 
         [HttpPost ("authenticate")]
+        [AllowAnonymous]
         public async Task<IActionResult> AuthenticateUser ([FromBody] AuthenticateUserDto user)
         {
             var authUser = await _userRepository.AuthenticateUserAsync (user.Username, user.Password);
@@ -91,6 +94,26 @@ namespace EventManager.API.Controllers
             authUser.Token = tokenString;
 
             var userToReturn = _mapper.Map<UserForAuthenticationDto> (authUser);
+
+            return Ok (userToReturn);
+        }
+        
+        [HttpGet ("{userId}", Name = "GetUserById")]
+        public async Task<IActionResult> GetUserById (Guid userId)
+        {
+            if (string.IsNullOrWhiteSpace (userId.ToString ()))
+            {
+                return BadRequest (new
+                {
+                    message = "User Id should not be null or empty!"
+                });
+            }
+
+            var user = await _userRepository.GetUserByIdAsync (userId);
+
+            if (user == null) return NotFound();
+
+            var userToReturn = _mapper.Map<UserDto> (user);
 
             return Ok (userToReturn);
         }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -12,5 +13,6 @@ namespace EventManager.API.Services
         Task<IEnumerable<User>> GetUsersAsync ();
         void AddUser (User user);
         Task<User> AuthenticateUserAsync (string username, string password);
+        Task<User> GetUserByIdAsync(Guid userId);
     }
 }
