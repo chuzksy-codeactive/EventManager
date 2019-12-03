@@ -15,6 +15,7 @@ namespace EventManager.API.Installers
                 options.UseSqlServer (
                     configuration.GetConnectionString ("DefaultConnection")));
             services.AddScoped<IUserRepository, UserRepository> ();
+            services.AddScoped<ICenterRepository, CenterRepository> ();
         }
     }
 }

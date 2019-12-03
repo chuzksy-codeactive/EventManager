@@ -14,14 +14,11 @@ namespace EventManager.API.Services
     public class UserRepository : IUserRepository, IDisposable
     {
         private DataContext _dataContext;
-        private readonly ILogger<UserRepository> _logger;
 
         public UserRepository (DataContext dataContext, ILogger<UserRepository> logger)
         {
             _dataContext = dataContext ??
                 throw new ArgumentNullException (nameof (dataContext));
-            _logger = logger ??
-                throw new ArgumentNullException (nameof (logger));
         }
         public void AddUser (User userToAdd)
         {
@@ -53,7 +50,7 @@ namespace EventManager.API.Services
 
         public async Task<User> GetUserByIdAsync (Guid userId)
         {
-            var user = await _dataContext.Users.FindAsync(userId);
+            var user = await _dataContext.Users.FindAsync (userId);
 
             if (user == null) return null;
 
@@ -64,7 +61,7 @@ namespace EventManager.API.Services
             return (await _dataContext.SaveChangesAsync () > 0);
         }
 
-        public bool UserExists (string username, string email)
+        public bool UserExistsAsync (string username, string email)
         {
             return _dataContext.Users.Any (u => u.Username == username || u.Email == email);
         }

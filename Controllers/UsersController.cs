@@ -47,7 +47,7 @@ namespace EventManager.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> CreateUser ([FromBody] UserForCreationDto userForCreation)
         {
-            if (_userRepository.UserExists (userForCreation.Username, userForCreation.Email))
+            if (_userRepository.UserExistsAsync (userForCreation.Username, userForCreation.Email))
             {
                 return BadRequest ("User already exists in the database");
             }
