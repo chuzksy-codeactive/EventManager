@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 using EventManager.API.Data;
 using EventManager.API.Domain.Entities;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.API.Services
@@ -17,14 +19,19 @@ namespace EventManager.API.Services
             _dataContext = dataContext ??
                 throw new ArgumentNullException (nameof (dataContext));
         }
-        public void AddCenterAsync (Center center)
+        public void AddCenter (Center centerToAdd)
         {
-            throw new NotImplementedException ();
+            if (centerToAdd == null)
+            {
+                throw new ArgumentNullException (nameof (centerToAdd));
+            }
+
+            _dataContext.Add (centerToAdd);
         }
 
-        public bool CenterExists (Guid centerId)
+        public bool CenterExists (string centerName)
         {
-            throw new NotImplementedException ();
+            return _dataContext.Centers.Any (x => x.Name == centerName);
         }
 
         public Task<bool> DeleteCenterAsync (Center center)
@@ -39,12 +46,12 @@ namespace EventManager.API.Services
 
         public async Task<IEnumerable<Center>> GetCentersAsync ()
         {
-            return await _dataContext.Centers.ToListAsync();
+            return await _dataContext.Centers.ToListAsync ();
         }
 
         public async Task<bool> SaveChangesAsync ()
         {
-            return (await _dataContext.SaveChangesAsync() > 0);
+            return (await _dataContext.SaveChangesAsync () > 0);
         }
 
         public Task<Center> UpdateCenterAsync (Center center)

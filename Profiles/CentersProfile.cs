@@ -10,6 +10,7 @@ namespace EventManager.API.Profiles
         public CentersProfile ()
         {
             CreateMap<Center, CenterDto> ();
+            CreateMap<CenterForCreationDto, Center> ();
         }
     }
 }

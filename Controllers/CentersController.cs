@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using AutoMapper;
-
+using EventManager.API.Domain.Entities;
 using EventManager.API.Models;
 using EventManager.API.Services;
 
@@ -34,6 +34,22 @@ namespace EventManager.API.Controllers
             var centersToReturn = _mapper.Map<IEnumerable<CenterDto>> (centers);
 
             return Ok (centersToReturn);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCenter ([FromBody] CenterForCreationDto centerForCreation)
+        {
+            if(_centerRepository.CenterExists(centerForCreation.Name))
+            {
+                return BadRequest("Center already exists in the database");
+            }
+
+            var center = _mapper.Map<Center>(centerForCreation);
+
+            _centerRepository.AddCenter(center);
+            await _centerRepository.SaveChangesAsync();
+
+            return Ok();
         }
     }
 }

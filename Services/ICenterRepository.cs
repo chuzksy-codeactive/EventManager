@@ -9,11 +9,11 @@ namespace EventManager.API.Services
     public interface ICenterRepository
     {
         Task<IEnumerable<Center>> GetCentersAsync ();
-        void AddCenterAsync(Center center);
+        void AddCenter(Center center);
         Task<Center> GetCenterByIdAsync(Guid centerId);
         Task<Center> UpdateCenterAsync(Center center);
         Task<bool> DeleteCenterAsync(Center center);
-        bool CenterExists(Guid centerId);
+        bool CenterExists(string centerName);
         Task<bool> SaveChangesAsync();
     }
 }
