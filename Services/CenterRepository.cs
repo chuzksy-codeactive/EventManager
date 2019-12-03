@@ -39,9 +39,9 @@ namespace EventManager.API.Services
             throw new NotImplementedException ();
         }
 
-        public Task<Center> GetCenterByIdAsync (Guid centerId)
+        public async Task<Center> GetCenterByIdAsync (Guid centerId)
         {
-            throw new NotImplementedException ();
+            return await _dataContext.Centers.FindAsync(centerId);
         }
 
         public async Task<IEnumerable<Center>> GetCentersAsync ()

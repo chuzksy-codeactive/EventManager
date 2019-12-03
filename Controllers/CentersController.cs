@@ -49,7 +49,32 @@ namespace EventManager.API.Controllers
             _centerRepository.AddCenter(center);
             await _centerRepository.SaveChangesAsync();
 
-            return Ok();
+            var centerToReturn = _mapper.Map<CenterDto>(center);
+
+            return CreatedAtRoute("GetCenterById", new { centerId = center.CenterId}, centerToReturn);
+        }
+
+        [HttpGet("{centerId}", Name = "GetCenterById")]
+        public async Task<IActionResult> GetCenterById(Guid centerId)
+        {
+            if(string.IsNullOrWhiteSpace(centerId.ToString()))
+            {
+                return BadRequest (new
+                {
+                    message = "User Id should not be null or empty!"
+                });
+            }
+
+            var center = await _centerRepository.GetCenterByIdAsync(centerId);
+
+            if(center == null)
+            {
+                return NotFound();
+            }
+
+            var centerToReturn = _mapper.Map<CenterDto>(center);
+
+            return Ok(centerToReturn);
         }
     }
 }
