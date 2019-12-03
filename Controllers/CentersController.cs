@@ -88,10 +88,31 @@ namespace EventManager.API.Controllers
                 return NotFound ();
             }
 
-            _centerRepository.DeleteCenter(center);
-            await _centerRepository.SaveChangesAsync();
+            _centerRepository.DeleteCenter (center);
+            await _centerRepository.SaveChangesAsync ();
 
-            return NoContent();
+            return NoContent ();
+        }
+
+        [HttpPut ("{centerId}")]
+        public async Task<IActionResult> UpdateCenter (Guid centerId, CenterForUpdateDto centerForUpdate)
+        {
+            var center = await _centerRepository.GetCenterByIdAsync (centerId);
+
+            if (center == null)
+            {
+                return NotFound ();
+            }
+
+            // map the entity to the courseForUpdateDto
+            // apply the updated fields value to that Dto
+            // map the courseForUpdateDto back to an entity
+            _mapper.Map (centerForUpdate, center);
+
+            _centerRepository.UpdateCenter (center);
+            await _centerRepository.SaveChangesAsync ();
+
+            return NoContent ();
         }
     }
 }

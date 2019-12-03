@@ -11,6 +11,7 @@ namespace EventManager.API.Profiles
         {
             CreateMap<Center, CenterDto> ();
             CreateMap<CenterForCreationDto, Center> ();
+            CreateMap<CenterForUpdateDto, Center> ();
         }
     }
 }

@@ -36,12 +36,12 @@ namespace EventManager.API.Services
 
         public void DeleteCenter (Center center)
         {
-            _dataContext.Remove(center);
+            _dataContext.Remove (center);
         }
 
         public async Task<Center> GetCenterByIdAsync (Guid centerId)
         {
-            return await _dataContext.Centers.FindAsync(centerId);
+            return await _dataContext.Centers.FindAsync (centerId);
         }
 
         public async Task<IEnumerable<Center>> GetCentersAsync ()
@@ -54,9 +54,9 @@ namespace EventManager.API.Services
             return (await _dataContext.SaveChangesAsync () > 0);
         }
 
-        public Task<Center> UpdateCenterAsync (Center center)
+        public void UpdateCenter (Center center)
         {
-            throw new NotImplementedException ();
+            // no code in this implementation
         }
 
         public void Dispose ()
