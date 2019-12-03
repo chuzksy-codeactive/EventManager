@@ -76,6 +76,7 @@ namespace EventManager.API.Installers
             services.AddMvc ().AddFluentValidation (config => config.RegisterValidatorsFromAssemblyContaining<Startup> ());
             services.AddTransient<IValidator<UserForCreationDto>, UserForCreationDtoValidator> ();
             services.AddTransient<IValidator<AuthenticateUserDto>, AuthenticateUserDtoValidator> ();
+            services.AddTransient<IValidator<CenterForCreationDto>, CenterForCreationDtoValidator> ();
         }
     }
 }
