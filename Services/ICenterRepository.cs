@@ -12,7 +12,7 @@ namespace EventManager.API.Services
         void AddCenter(Center center);
         Task<Center> GetCenterByIdAsync(Guid centerId);
         Task<Center> UpdateCenterAsync(Center center);
-        Task<bool> DeleteCenterAsync(Center center);
+        void DeleteCenter(Center center);
         bool CenterExists(string centerName);
         Task<bool> SaveChangesAsync();
     }

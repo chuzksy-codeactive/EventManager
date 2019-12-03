@@ -34,9 +34,9 @@ namespace EventManager.API.Services
             return _dataContext.Centers.Any (x => x.Name == centerName);
         }
 
-        public Task<bool> DeleteCenterAsync (Center center)
+        public void DeleteCenter (Center center)
         {
-            throw new NotImplementedException ();
+            _dataContext.Remove(center);
         }
 
         public async Task<Center> GetCenterByIdAsync (Guid centerId)

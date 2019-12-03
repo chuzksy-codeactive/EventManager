@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using AutoMapper;
+
 using EventManager.API.Domain.Entities;
 using EventManager.API.Models;
 using EventManager.API.Services;
@@ -39,25 +40,25 @@ namespace EventManager.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCenter ([FromBody] CenterForCreationDto centerForCreation)
         {
-            if(_centerRepository.CenterExists(centerForCreation.Name))
+            if (_centerRepository.CenterExists (centerForCreation.Name))
             {
-                return BadRequest("Center already exists in the database");
+                return BadRequest ("Center already exists in the database");
             }
 
-            var center = _mapper.Map<Center>(centerForCreation);
+            var center = _mapper.Map<Center> (centerForCreation);
 
-            _centerRepository.AddCenter(center);
-            await _centerRepository.SaveChangesAsync();
+            _centerRepository.AddCenter (center);
+            await _centerRepository.SaveChangesAsync ();
 
-            var centerToReturn = _mapper.Map<CenterDto>(center);
+            var centerToReturn = _mapper.Map<CenterDto> (center);
 
-            return CreatedAtRoute("GetCenterById", new { centerId = center.CenterId}, centerToReturn);
+            return CreatedAtRoute ("GetCenterById", new { centerId = center.CenterId }, centerToReturn);
         }
 
-        [HttpGet("{centerId}", Name = "GetCenterById")]
-        public async Task<IActionResult> GetCenterById(Guid centerId)
+        [HttpGet ("{centerId}", Name = "GetCenterById")]
+        public async Task<IActionResult> GetCenterById (Guid centerId)
         {
-            if(string.IsNullOrWhiteSpace(centerId.ToString()))
+            if (string.IsNullOrWhiteSpace (centerId.ToString ()))
             {
                 return BadRequest (new
                 {
@@ -65,16 +66,32 @@ namespace EventManager.API.Controllers
                 });
             }
 
-            var center = await _centerRepository.GetCenterByIdAsync(centerId);
+            var center = await _centerRepository.GetCenterByIdAsync (centerId);
 
-            if(center == null)
+            if (center == null)
             {
-                return NotFound();
+                return NotFound ();
             }
 
-            var centerToReturn = _mapper.Map<CenterDto>(center);
+            var centerToReturn = _mapper.Map<CenterDto> (center);
 
-            return Ok(centerToReturn);
+            return Ok (centerToReturn);
+        }
+
+        [HttpDelete ("{centerId}")]
+        public async Task<IActionResult> DeleteCenter (Guid centerId)
+        {
+            var center = await _centerRepository.GetCenterByIdAsync (centerId);
+
+            if (center == null)
+            {
+                return NotFound ();
+            }
+
+            _centerRepository.DeleteCenter(center);
+            await _centerRepository.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
