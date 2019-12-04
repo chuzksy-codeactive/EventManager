@@ -32,7 +32,7 @@ namespace EventManager.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCenters ([FromQuery] CentersResourceParameters centersResourceParameters)
         {
-            var centers = await _centerRepository.GetCentersAsync (centersResourceParameters);
+            var centers = _centerRepository.GetCenters (centersResourceParameters);
 
             var centersToReturn = _mapper.Map<IEnumerable<CenterDto>> (centers);
 

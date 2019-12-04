@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 
 using EventManager.API.Data;
 using EventManager.API.Domain.Entities;
+using EventManager.API.Helpers;
 using EventManager.API.ResourceParameters;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.API.Services
@@ -49,7 +51,7 @@ namespace EventManager.API.Services
             return await _dataContext.Centers.ToListAsync ();
         }
 
-        public async Task<IEnumerable<Center>> GetCentersAsync (CentersResourceParameters centersResourceParameters)
+        public PagedList<Center> GetCenters (CentersResourceParameters centersResourceParameters)
         {
             var centers = _dataContext.Centers as IQueryable<Center>;
 
@@ -66,10 +68,7 @@ namespace EventManager.API.Services
                     x.Location.Contains (searchQuery));
             }
 
-            return centers
-                .Skip(centersResourceParameters.PageSize * (centersResourceParameters.PageNumber - 1))
-                .Take(centersResourceParameters.PageSize)
-                .ToList();
+            return PagedList<Center>.Create(centers, centersResourceParameters.PageNumber, centersResourceParameters.PageSize);
         }
 
         public async Task<bool> SaveChangesAsync ()

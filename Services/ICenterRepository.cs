@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using EventManager.API.Domain.Entities;
+using EventManager.API.Helpers;
 using EventManager.API.ResourceParameters;
 
 namespace EventManager.API.Services
 {
     public interface ICenterRepository
     {
-        Task<IEnumerable<Center>> GetCentersAsync (CentersResourceParameters centersResourceParameters);
+        PagedList<Center> GetCenters (CentersResourceParameters centersResourceParameters);
         void AddCenter (Center center);
         Task<Center> GetCenterByIdAsync (Guid centerId);
         void UpdateCenter (Center center);
