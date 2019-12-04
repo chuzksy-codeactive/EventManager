@@ -8,6 +8,7 @@ using EventManager.API.Domain.Entities;
 using EventManager.API.Models;
 using EventManager.API.Services;
 
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventManager.API.Controllers
@@ -113,6 +114,28 @@ namespace EventManager.API.Controllers
             await _centerRepository.SaveChangesAsync ();
 
             return NoContent ();
+        }
+
+        [HttpPatch ("{centerId}")]
+        public async Task<IActionResult> PartiallyUpdateCenter (Guid centerId, JsonPatchDocument<CenterForUpdateDto> patchDocument)
+        {
+            var center = await _centerRepository.GetCenterByIdAsync (centerId);
+
+            if (center == null)
+            {
+                return NotFound ();
+            }
+
+            var centerToPatch = _mapper.Map<CenterForUpdateDto>(center);
+
+            patchDocument.ApplyTo(centerToPatch);
+
+            _mapper.Map(centerToPatch, center);
+
+            _centerRepository.UpdateCenter(center);
+            await _centerRepository.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

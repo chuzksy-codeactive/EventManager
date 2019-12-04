@@ -17,6 +17,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
+using Newtonsoft.Json.Serialization;
+
 namespace EventManager.API.Installers
 {
     public class MvcInstaller : IInstaller
@@ -45,7 +47,11 @@ namespace EventManager.API.Installers
                     };
                 });
 
-            services.AddControllers ();
+            services.AddControllers ()
+                .AddNewtonsoftJson (setupAction =>
+                {
+                    setupAction.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver ();
+                });
             services.AddSwaggerGen (sw =>
             {
                 sw.SwaggerDoc ("v1", new OpenApiInfo
