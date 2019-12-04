@@ -68,6 +68,14 @@ namespace EventManager.API.Services
                     x.Location.Contains (searchQuery));
             }
 
+            if(!string.IsNullOrWhiteSpace(centersResourceParameters.OrderBy))
+            {
+                if(centersResourceParameters.OrderBy.ToLowerInvariant() == "name")
+                {
+                    centers = centers.OrderBy(x => x.Name).ThenBy(x => x.Location);
+                }
+            }
+
             return PagedList<Center>.Create(centers, centersResourceParameters.PageNumber, centersResourceParameters.PageSize);
         }
 
