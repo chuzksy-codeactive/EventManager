@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 using EventManager.API.Data;
 using EventManager.API.Domain.Entities;
-
+using EventManager.API.ResourceParameters;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.API.Services
@@ -47,6 +47,30 @@ namespace EventManager.API.Services
         public async Task<IEnumerable<Center>> GetCentersAsync ()
         {
             return await _dataContext.Centers.ToListAsync ();
+        }
+
+        public async Task<IEnumerable<Center>> GetCentersAsync (CentersResourceParameters centersResourceParameters)
+        {
+            if (string.IsNullOrWhiteSpace (centersResourceParameters.Name) && string.IsNullOrWhiteSpace (centersResourceParameters.SearchQuery))
+            {
+                return await GetCentersAsync ();
+            }
+            var centers = _dataContext.Centers as IQueryable<Center>;
+
+            if (!string.IsNullOrWhiteSpace (centersResourceParameters.Name))
+            {
+                var name = centersResourceParameters.Name.Trim ();
+                centers = centers.Where (x => x.Name == name);
+            }
+
+            if (!string.IsNullOrWhiteSpace (centersResourceParameters.SearchQuery))
+            {
+                var searchQuery = centersResourceParameters.SearchQuery.Trim ();
+                centers = centers.Where (x => x.Name.Contains (searchQuery) ||
+                    x.Location.Contains (searchQuery));
+            }
+
+            return centers.ToList();
         }
 
         public async Task<bool> SaveChangesAsync ()

@@ -6,6 +6,7 @@ using AutoMapper;
 
 using EventManager.API.Domain.Entities;
 using EventManager.API.Models;
+using EventManager.API.ResourceParameters;
 using EventManager.API.Services;
 
 using Microsoft.AspNetCore.JsonPatch;
@@ -29,9 +30,9 @@ namespace EventManager.API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCenters ()
+        public async Task<IActionResult> GetCenters ([FromQuery] CentersResourceParameters centersResourceParameters)
         {
-            var centers = await _centerRepository.GetCentersAsync ();
+            var centers = await _centerRepository.GetCentersAsync (centersResourceParameters);
 
             var centersToReturn = _mapper.Map<IEnumerable<CenterDto>> (centers);
 
