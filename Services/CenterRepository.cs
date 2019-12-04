@@ -51,10 +51,6 @@ namespace EventManager.API.Services
 
         public async Task<IEnumerable<Center>> GetCentersAsync (CentersResourceParameters centersResourceParameters)
         {
-            if (string.IsNullOrWhiteSpace (centersResourceParameters.Name) && string.IsNullOrWhiteSpace (centersResourceParameters.SearchQuery))
-            {
-                return await GetCentersAsync ();
-            }
             var centers = _dataContext.Centers as IQueryable<Center>;
 
             if (!string.IsNullOrWhiteSpace (centersResourceParameters.Name))
@@ -70,7 +66,10 @@ namespace EventManager.API.Services
                     x.Location.Contains (searchQuery));
             }
 
-            return centers.ToList();
+            return centers
+                .Skip(centersResourceParameters.PageSize * (centersResourceParameters.PageNumber - 1))
+                .Take(centersResourceParameters.PageSize)
+                .ToList();
         }
 
         public async Task<bool> SaveChangesAsync ()
