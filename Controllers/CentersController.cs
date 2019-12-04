@@ -126,16 +126,21 @@ namespace EventManager.API.Controllers
                 return NotFound ();
             }
 
-            var centerToPatch = _mapper.Map<CenterForUpdateDto>(center);
+            var centerToPatch = _mapper.Map<CenterForUpdateDto> (center);
 
-            patchDocument.ApplyTo(centerToPatch);
+            patchDocument.ApplyTo (centerToPatch, ModelState);
 
-            _mapper.Map(centerToPatch, center);
+            if (!TryValidateModel (centerToPatch))
+            {
+                return ValidationProblem (ModelState);
+            }
 
-            _centerRepository.UpdateCenter(center);
-            await _centerRepository.SaveChangesAsync();
+            _mapper.Map (centerToPatch, center);
 
-            return NoContent();
+            _centerRepository.UpdateCenter (center);
+            await _centerRepository.SaveChangesAsync ();
+
+            return NoContent ();
         }
     }
 }
