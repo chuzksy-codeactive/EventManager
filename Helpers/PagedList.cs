@@ -10,8 +10,8 @@ namespace EventManager.API.Helpers
         public int TotalPages { get; set; }
         public int PageSize { get; set; }
         public int TotalCount { get; set; }
-        public bool HasPrevious { get; set; }
-        public bool HasNext { get; set; }
+        public bool HasPrevious => (CurrentPage > 1);
+        public bool HasNext => (CurrentPage < TotalPages);
 
         public PagedList (List<T> items, int count, int pageNumber, int pageSize)
         {

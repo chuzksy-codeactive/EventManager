@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 using AutoMapper;
 
 using EventManager.API.Domain.Entities;
+using EventManager.API.Helpers;
 using EventManager.API.Models;
 using EventManager.API.ResourceParameters;
 using EventManager.API.Services;
@@ -29,14 +31,30 @@ namespace EventManager.API.Controllers
                 throw new ArgumentNullException (nameof (mapper));
         }
 
-        [HttpGet]
+        [HttpGet (Name = "GetCenters")]
         public async Task<IActionResult> GetCenters ([FromQuery] CentersResourceParameters centersResourceParameters)
         {
             var centers = _centerRepository.GetCenters (centersResourceParameters);
 
-            var centersToReturn = _mapper.Map<IEnumerable<CenterDto>> (centers);
+            var previousPageLink = centers.HasPrevious ?
+                CreateCenterResourceUri (centersResourceParameters, ResourceUriType.PreviousPage) : null;
 
-            return Ok (centersToReturn);
+            var nextPageLink = centers.HasNext ?
+                CreateCenterResourceUri (centersResourceParameters, ResourceUriType.NextPage) : null;
+
+            var paginationMetadata = new
+            {
+                totalCount = centers.TotalCount,
+                pageSize = centers.PageSize,
+                currentPage = centers.CurrentPage,
+                totalPages = centers.TotalPages,
+                previousPageLink,
+                nextPageLink
+            };
+
+            Response.Headers.Add ("X-Pagination", JsonSerializer.Serialize (paginationMetadata));
+
+            return Ok (_mapper.Map<IEnumerable<CenterDto>> (centers));
         }
 
         [HttpPost]
@@ -142,6 +160,37 @@ namespace EventManager.API.Controllers
             await _centerRepository.SaveChangesAsync ();
 
             return NoContent ();
+        }
+
+        private string CreateCenterResourceUri (CentersResourceParameters centersResourceParameters, ResourceUriType type)
+        {
+            switch (type)
+            {
+            case ResourceUriType.PreviousPage:
+                return Url.Link ("GetCenters", new
+                {
+                    pageNumber = centersResourceParameters.PageNumber - 1,
+                        pageSize = centersResourceParameters.PageSize,
+                        name = centersResourceParameters.Name,
+                        searchQuery = centersResourceParameters.SearchQuery
+                });
+            case ResourceUriType.NextPage:
+                return Url.Link ("GetCenters", new
+                {
+                    pageNumber = centersResourceParameters.PageNumber + 1,
+                        pageSize = centersResourceParameters.PageSize,
+                        mainCategory = centersResourceParameters.Name,
+                        searchQuery = centersResourceParameters.SearchQuery
+                });
+            default:
+                return Url.Link ("GetCenters", new
+                {
+                    pageNumber = centersResourceParameters.PageNumber,
+                        pageSize = centersResourceParameters.PageSize,
+                        mainCategory = centersResourceParameters.Name,
+                        searchQuery = centersResourceParameters.SearchQuery
+                });
+            }
         }
     }
 }
