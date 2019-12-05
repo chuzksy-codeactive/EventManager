@@ -23,10 +23,12 @@ namespace EventManager.API.Controllers
         private readonly ICenterRepository _centerRepository;
         private readonly IMapper _mapper;
         private readonly IPropertyMappingService _propertyMappingService;
+        private readonly IPropertyCheckerService _propertyCheckerService;
 
         public CentersController (
             ICenterRepository centerRepository,
             IMapper mapper,
+            IPropertyCheckerService propertyCheckerService,
             IPropertyMappingService propertyMappingService)
         {
             _centerRepository = centerRepository ??
@@ -35,12 +37,19 @@ namespace EventManager.API.Controllers
                 throw new ArgumentNullException (nameof (mapper));
             _propertyMappingService = propertyMappingService ??
                 throw new ArgumentNullException (nameof (propertyMappingService));
+            _propertyCheckerService = propertyCheckerService ??
+                throw new ArgumentNullException (nameof (propertyCheckerService));
         }
 
         [HttpGet (Name = "GetCenters")]
         public IActionResult GetCenters ([FromQuery] CentersResourceParameters centersResourceParameters)
         {
             if (!_propertyMappingService.ValidMappingExistsFor<CenterDto, Center> (centersResourceParameters.OrderBy))
+            {
+                return BadRequest ();
+            }
+
+            if (!_propertyCheckerService.TypeHasProperties<CenterDto> (centersResourceParameters.Fields))
             {
                 return BadRequest ();
             }
@@ -65,7 +74,7 @@ namespace EventManager.API.Controllers
 
             Response.Headers.Add ("X-Pagination", JsonSerializer.Serialize (paginationMetadata));
 
-            return Ok (_mapper.Map<IEnumerable<CenterDto>> (centers).ShapeData(centersResourceParameters.Fields));
+            return Ok (_mapper.Map<IEnumerable<CenterDto>> (centers).ShapeData (centersResourceParameters.Fields));
         }
 
         [HttpPost]
@@ -97,6 +106,11 @@ namespace EventManager.API.Controllers
                 });
             }
 
+            if (!_propertyCheckerService.TypeHasProperties<CenterDto> (fields))
+            {
+                return BadRequest ();
+            }
+
             var center = await _centerRepository.GetCenterByIdAsync (centerId);
 
             if (center == null)
@@ -106,7 +120,7 @@ namespace EventManager.API.Controllers
 
             var centerToReturn = _mapper.Map<CenterDto> (center);
 
-            return Ok (centerToReturn.ShapeData(fields));
+            return Ok (centerToReturn.ShapeData (fields));
         }
 
         [HttpDelete ("{centerId}")]
