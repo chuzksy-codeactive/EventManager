@@ -77,7 +77,7 @@ namespace EventManager.API.Controllers
             return Ok (_mapper.Map<IEnumerable<CenterDto>> (centers).ShapeData (centersResourceParameters.Fields));
         }
 
-        [HttpPost]
+        [HttpPost (Name = "CreateCenter")]
         public async Task<IActionResult> CreateCenter ([FromBody] CenterForCreationDto centerForCreation)
         {
             if (_centerRepository.CenterExists (centerForCreation.Name))
@@ -118,12 +118,16 @@ namespace EventManager.API.Controllers
                 return NotFound ();
             }
 
-            var centerToReturn = _mapper.Map<CenterDto> (center);
+            var links = CreateLinksForCenter (centerId, fields);
 
-            return Ok (centerToReturn.ShapeData (fields));
+            var linkedResourceToReturn = _mapper.Map<CenterDto> (center).ShapeData (fields) as IDictionary<string, object>;
+
+            linkedResourceToReturn.Add ("links", links);
+
+            return Ok (linkedResourceToReturn);
         }
 
-        [HttpDelete ("{centerId}")]
+        [HttpDelete ("{centerId}", Name = "DeleteCenter")]
         public async Task<IActionResult> DeleteCenter (Guid centerId)
         {
             var center = await _centerRepository.GetCenterByIdAsync (centerId);
@@ -222,6 +226,40 @@ namespace EventManager.API.Controllers
                         searchQuery = centersResourceParameters.SearchQuery
                 });
             }
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForCenter (Guid centerId, string fields)
+        {
+            var links = new List<LinkDto> ();
+
+            if (string.IsNullOrWhiteSpace (fields))
+            {
+                links.Add (
+                    new LinkDto (Url.Link ("GetCenterById", new { centerId }),
+                        "self",
+                        "GET"));
+            }
+            else
+            {
+                links.Add (
+                    new LinkDto (Url.Link ("GetCenterById", new { centerId, fields }),
+                        "self",
+                        "GET"));
+            }
+            links.Add (
+                new LinkDto (Url.Link ("DeleteCenter", new { centerId }),
+                    "delete_center",
+                    "DELETE"));
+            links.Add (
+                new LinkDto (Url.Link ("CreateCenter", null),
+                    "create_center",
+                    "POST"));
+            links.Add (
+                new LinkDto (Url.Link ("GetCenters", null),
+                    "centers",
+                    "GET"));
+
+            return links;
         }
     }
 }
