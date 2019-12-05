@@ -92,7 +92,12 @@ namespace EventManager.API.Controllers
 
             var centerToReturn = _mapper.Map<CenterDto> (center);
 
-            return CreatedAtRoute ("GetCenterById", new { centerId = center.CenterId }, centerToReturn);
+            var links = CreateLinksForCenter(centerToReturn.CenterId, null);
+            var linkedResourceToReturn = centerToReturn.ShapeData(null) as IDictionary<string, object>;
+
+            linkedResourceToReturn.Add("links", links);
+
+            return CreatedAtRoute ("GetCenterById", new { centerId = linkedResourceToReturn["CenterId"] }, linkedResourceToReturn);
         }
 
         [HttpGet ("{centerId}", Name = "GetCenterById")]
