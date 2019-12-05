@@ -7,7 +7,7 @@ using AutoMapper;
 using EventManager.API.Domain.Validators;
 using EventManager.API.Models;
 using EventManager.API.Options;
-
+using EventManager.API.Services;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 
@@ -78,6 +78,7 @@ namespace EventManager.API.Installers
                     }
                 });
             });
+            services.AddTransient<IPropertyMappingService, PropertyMappingService> ();
             services.AddAutoMapper (AppDomain.CurrentDomain.GetAssemblies ());
             services.AddMvc ().AddFluentValidation (config => config.RegisterValidatorsFromAssemblyContaining<Startup> ());
             services.AddTransient<IValidator<UserForCreationDto>, UserForCreationDtoValidator> ();

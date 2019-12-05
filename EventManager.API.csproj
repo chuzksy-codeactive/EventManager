@@ -5,11 +5,6 @@
     <UserSecretsId>aspnet-EventManager.API-0F499951-481E-473C-B121-55D8525CEAF6</UserSecretsId>
   </PropertyGroup>
 
-
-  <ItemGroup>
-    <None Update="app.db" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="3.2.1" />

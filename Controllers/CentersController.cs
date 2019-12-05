@@ -22,18 +22,29 @@ namespace EventManager.API.Controllers
     {
         private readonly ICenterRepository _centerRepository;
         private readonly IMapper _mapper;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public CentersController (ICenterRepository centerRepository, IMapper mapper)
+        public CentersController (
+            ICenterRepository centerRepository,
+            IMapper mapper,
+            IPropertyMappingService propertyMappingService)
         {
             _centerRepository = centerRepository ??
                 throw new ArgumentNullException (nameof (centerRepository));
             _mapper = mapper ??
                 throw new ArgumentNullException (nameof (mapper));
+            _propertyMappingService = propertyMappingService ??
+                throw new ArgumentNullException (nameof (propertyMappingService));
         }
 
         [HttpGet (Name = "GetCenters")]
-        public async Task<IActionResult> GetCenters ([FromQuery] CentersResourceParameters centersResourceParameters)
+        public IActionResult GetCenters ([FromQuery] CentersResourceParameters centersResourceParameters)
         {
+            if (!_propertyMappingService.ValidMappingExistsFor<CenterDto, Center> (centersResourceParameters.OrderBy))
+            {
+                return BadRequest ();
+            }
+
             var centers = _centerRepository.GetCenters (centersResourceParameters);
 
             var previousPageLink = centers.HasPrevious ?
@@ -169,7 +180,8 @@ namespace EventManager.API.Controllers
             case ResourceUriType.PreviousPage:
                 return Url.Link ("GetCenters", new
                 {
-                    pageNumber = centersResourceParameters.PageNumber - 1,
+                    orderBy = centersResourceParameters.OrderBy,
+                        pageNumber = centersResourceParameters.PageNumber - 1,
                         pageSize = centersResourceParameters.PageSize,
                         name = centersResourceParameters.Name,
                         searchQuery = centersResourceParameters.SearchQuery
@@ -177,17 +189,19 @@ namespace EventManager.API.Controllers
             case ResourceUriType.NextPage:
                 return Url.Link ("GetCenters", new
                 {
-                    pageNumber = centersResourceParameters.PageNumber + 1,
+                    orderBy = centersResourceParameters.OrderBy,
+                        pageNumber = centersResourceParameters.PageNumber + 1,
                         pageSize = centersResourceParameters.PageSize,
-                        mainCategory = centersResourceParameters.Name,
+                        name = centersResourceParameters.Name,
                         searchQuery = centersResourceParameters.SearchQuery
                 });
             default:
                 return Url.Link ("GetCenters", new
                 {
-                    pageNumber = centersResourceParameters.PageNumber,
+                    orderBy = centersResourceParameters.OrderBy,
+                        pageNumber = centersResourceParameters.PageNumber,
                         pageSize = centersResourceParameters.PageSize,
-                        mainCategory = centersResourceParameters.Name,
+                        name = centersResourceParameters.Name,
                         searchQuery = centersResourceParameters.SearchQuery
                 });
             }

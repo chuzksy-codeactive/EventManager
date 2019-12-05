@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using EventManager.API.Data;
 using EventManager.API.Domain.Entities;
 using EventManager.API.Helpers;
+using EventManager.API.Models;
 using EventManager.API.ResourceParameters;
 
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +16,14 @@ namespace EventManager.API.Services
     public class CenterRepository : ICenterRepository
     {
         private DataContext _dataContext;
+        private readonly IPropertyMappingService _propertyMappingService;
 
-        public CenterRepository (DataContext dataContext)
+        public CenterRepository (DataContext dataContext, IPropertyMappingService propertyMappingService)
         {
             _dataContext = dataContext ??
                 throw new ArgumentNullException (nameof (dataContext));
+            _propertyMappingService = propertyMappingService ??
+                throw new ArgumentNullException (nameof (propertyMappingService));
         }
         public void AddCenter (Center centerToAdd)
         {
@@ -53,7 +57,12 @@ namespace EventManager.API.Services
 
         public PagedList<Center> GetCenters (CentersResourceParameters centersResourceParameters)
         {
-            var centers = _dataContext.Centers as IQueryable<Center>;
+            if (centersResourceParameters == null)
+            {
+                throw new ArgumentNullException (nameof (centersResourceParameters));
+            }
+
+            IQueryable<Center> centers = _dataContext.Centers as IQueryable<Center>;
 
             if (!string.IsNullOrWhiteSpace (centersResourceParameters.Name))
             {
@@ -68,15 +77,14 @@ namespace EventManager.API.Services
                     x.Location.Contains (searchQuery));
             }
 
-            if(!string.IsNullOrWhiteSpace(centersResourceParameters.OrderBy))
+            if (!string.IsNullOrWhiteSpace (centersResourceParameters.OrderBy))
             {
-                if(centersResourceParameters.OrderBy.ToLowerInvariant() == "name")
-                {
-                    centers = centers.OrderBy(x => x.Name).ThenBy(x => x.Location);
-                }
+                var centerPropertyMappingDictionary = _propertyMappingService.GetPropertyMapping<CenterDto, Center> ();
+
+                centers = centers.ApplySort (centersResourceParameters.OrderBy, centerPropertyMappingDictionary);
             }
 
-            return PagedList<Center>.Create(centers, centersResourceParameters.PageNumber, centersResourceParameters.PageSize);
+            return PagedList<Center>.Create (centers, centersResourceParameters.PageNumber, centersResourceParameters.PageSize);
         }
 
         public async Task<bool> SaveChangesAsync ()
