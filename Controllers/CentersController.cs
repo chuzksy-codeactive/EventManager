@@ -14,6 +14,7 @@ using EventManager.API.Services;
 
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 
 namespace EventManager.API.Controllers
 {
@@ -67,19 +68,19 @@ namespace EventManager.API.Controllers
 
             Response.Headers.Add ("X-Pagination", JsonSerializer.Serialize (paginationMetadata));
 
-            var links = CreateLinksForCenters(centersResourceParameters, centers.HasNext, centers.HasPrevious);
+            var links = CreateLinksForCenters (centersResourceParameters, centers.HasNext, centers.HasPrevious);
             var shapeCenters = _mapper.Map<IEnumerable<CenterDto>> (centers).ShapeData (centersResourceParameters.Fields);
-            var shapeCentersWithLinks = shapeCenters.Select(center => 
+            var shapeCentersWithLinks = shapeCenters.Select (center =>
             {
                 var centerAsDictionary = center as IDictionary<string, object>;
-                var centerLinks = CreateLinksForCenter((Guid)centerAsDictionary["CenterId"], null);
+                var centerLinks = CreateLinksForCenter ((Guid) centerAsDictionary["CenterId"], null);
 
-                centerAsDictionary.Add("links", centerLinks);
-                
+                centerAsDictionary.Add ("links", centerLinks);
+
                 return centerAsDictionary;
             });
 
-            var linkedCollectionResource = new 
+            var linkedCollectionResource = new
             {
                 value = shapeCentersWithLinks,
                 links,
@@ -112,8 +113,13 @@ namespace EventManager.API.Controllers
         }
 
         [HttpGet ("{centerId}", Name = "GetCenterById")]
-        public async Task<IActionResult> GetCenterById (Guid centerId, string fields)
+        public async Task<IActionResult> GetCenterById (Guid centerId, string fields, [FromHeader (Name = "Accept")] string mediaType)
         {
+            if (!MediaTypeHeaderValue.TryParse (mediaType, out MediaTypeHeaderValue parsedMediaType))
+            {
+                return BadRequest ();
+            }
+
             if (string.IsNullOrWhiteSpace (centerId.ToString ()))
             {
                 return BadRequest (new
@@ -134,13 +140,18 @@ namespace EventManager.API.Controllers
                 return NotFound ();
             }
 
-            var links = CreateLinksForCenter (centerId, fields);
+            if (parsedMediaType.MediaType == "application/vnd.marvin.hateoas+json")
+            {
+                var links = CreateLinksForCenter (centerId, fields);
 
-            var linkedResourceToReturn = _mapper.Map<CenterDto> (center).ShapeData (fields) as IDictionary<string, object>;
+                var linkedResourceToReturn = _mapper.Map<CenterDto> (center).ShapeData (fields) as IDictionary<string, object>;
 
-            linkedResourceToReturn.Add ("links", links);
+                linkedResourceToReturn.Add ("links", links);
 
-            return Ok (linkedResourceToReturn);
+                return Ok (linkedResourceToReturn);
+            }
+
+            return Ok (_mapper.Map<CenterDto> (center).ShapeData (fields));
         }
 
         [HttpDelete ("{centerId}", Name = "DeleteCenter")]

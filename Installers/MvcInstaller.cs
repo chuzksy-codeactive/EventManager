@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using AutoMapper;
@@ -13,6 +14,8 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -78,6 +81,16 @@ namespace EventManager.API.Installers
                         new List<string> ()
                     }
                 });
+            });
+            services.Configure<MvcOptions> (config =>
+            {
+                var newtonsoftJsonOutputFormatter = config.OutputFormatters
+                    .OfType<NewtonsoftJsonOutputFormatter> ()?.FirstOrDefault ();
+
+                if (newtonsoftJsonOutputFormatter != null)
+                {
+                    newtonsoftJsonOutputFormatter.SupportedMediaTypes.Add ("application/vnd.marvin.hateoas+json");
+                }
             });
             services.AddTransient<IPropertyMappingService, PropertyMappingService> ();
             services.AddTransient<IPropertyCheckerService, PropertyCheckerService> ();
