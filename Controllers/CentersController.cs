@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -56,25 +57,35 @@ namespace EventManager.API.Controllers
 
             var centers = _centerRepository.GetCenters (centersResourceParameters);
 
-            var previousPageLink = centers.HasPrevious ?
-                CreateCenterResourceUri (centersResourceParameters, ResourceUriType.PreviousPage) : null;
-
-            var nextPageLink = centers.HasNext ?
-                CreateCenterResourceUri (centersResourceParameters, ResourceUriType.NextPage) : null;
-
             var paginationMetadata = new
             {
                 totalCount = centers.TotalCount,
                 pageSize = centers.PageSize,
                 currentPage = centers.CurrentPage,
-                totalPages = centers.TotalPages,
-                previousPageLink,
-                nextPageLink
+                totalPages = centers.TotalPages
             };
 
             Response.Headers.Add ("X-Pagination", JsonSerializer.Serialize (paginationMetadata));
 
-            return Ok (_mapper.Map<IEnumerable<CenterDto>> (centers).ShapeData (centersResourceParameters.Fields));
+            var links = CreateLinksForCenters(centersResourceParameters, centers.HasNext, centers.HasPrevious);
+            var shapeCenters = _mapper.Map<IEnumerable<CenterDto>> (centers).ShapeData (centersResourceParameters.Fields);
+            var shapeCentersWithLinks = shapeCenters.Select(center => 
+            {
+                var centerAsDictionary = center as IDictionary<string, object>;
+                var centerLinks = CreateLinksForCenter((Guid)centerAsDictionary["CenterId"], null);
+
+                centerAsDictionary.Add("links", centerLinks);
+                
+                return centerAsDictionary;
+            });
+
+            var linkedCollectionResource = new 
+            {
+                value = shapeCentersWithLinks,
+                links,
+            };
+
+            return Ok (linkedCollectionResource);
         }
 
         [HttpPost (Name = "CreateCenter")]
@@ -92,10 +103,10 @@ namespace EventManager.API.Controllers
 
             var centerToReturn = _mapper.Map<CenterDto> (center);
 
-            var links = CreateLinksForCenter(centerToReturn.CenterId, null);
-            var linkedResourceToReturn = centerToReturn.ShapeData(null) as IDictionary<string, object>;
+            var links = CreateLinksForCenter (centerToReturn.CenterId, null);
+            var linkedResourceToReturn = centerToReturn.ShapeData (null) as IDictionary<string, object>;
 
-            linkedResourceToReturn.Add("links", links);
+            linkedResourceToReturn.Add ("links", links);
 
             return CreatedAtRoute ("GetCenterById", new { centerId = linkedResourceToReturn["CenterId"] }, linkedResourceToReturn);
         }
@@ -220,6 +231,7 @@ namespace EventManager.API.Controllers
                         name = centersResourceParameters.Name,
                         searchQuery = centersResourceParameters.SearchQuery
                 });
+            case ResourceUriType.Current:
             default:
                 return Url.Link ("GetCenters", new
                 {
@@ -263,6 +275,31 @@ namespace EventManager.API.Controllers
                 new LinkDto (Url.Link ("GetCenters", null),
                     "centers",
                     "GET"));
+
+            return links;
+        }
+
+        private IEnumerable<LinkDto> CreateLinksForCenters (CentersResourceParameters centersResourceParameters, bool hasNext, bool hasPrevious)
+        {
+            var links = new List<LinkDto> ();
+
+            // self 
+            links.Add (
+                new LinkDto (CreateCenterResourceUri (
+                    centersResourceParameters, ResourceUriType.Current), "self", "GET"));
+            if (hasNext)
+            {
+                links.Add (
+                    new LinkDto (CreateCenterResourceUri (centersResourceParameters, ResourceUriType.NextPage),
+                        "nextPage", "GET"));
+            }
+
+            if (hasPrevious)
+            {
+                links.Add (
+                    new LinkDto (CreateCenterResourceUri (centersResourceParameters, ResourceUriType.PreviousPage),
+                        "previousPage", "GET"));
+            }
 
             return links;
         }
