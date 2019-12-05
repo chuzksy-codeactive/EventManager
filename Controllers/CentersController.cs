@@ -65,7 +65,7 @@ namespace EventManager.API.Controllers
 
             Response.Headers.Add ("X-Pagination", JsonSerializer.Serialize (paginationMetadata));
 
-            return Ok (_mapper.Map<IEnumerable<CenterDto>> (centers));
+            return Ok (_mapper.Map<IEnumerable<CenterDto>> (centers).ShapeData(centersResourceParameters.Fields));
         }
 
         [HttpPost]
@@ -87,7 +87,7 @@ namespace EventManager.API.Controllers
         }
 
         [HttpGet ("{centerId}", Name = "GetCenterById")]
-        public async Task<IActionResult> GetCenterById (Guid centerId)
+        public async Task<IActionResult> GetCenterById (Guid centerId, string fields)
         {
             if (string.IsNullOrWhiteSpace (centerId.ToString ()))
             {
@@ -106,7 +106,7 @@ namespace EventManager.API.Controllers
 
             var centerToReturn = _mapper.Map<CenterDto> (center);
 
-            return Ok (centerToReturn);
+            return Ok (centerToReturn.ShapeData(fields));
         }
 
         [HttpDelete ("{centerId}")]
@@ -180,7 +180,8 @@ namespace EventManager.API.Controllers
             case ResourceUriType.PreviousPage:
                 return Url.Link ("GetCenters", new
                 {
-                    orderBy = centersResourceParameters.OrderBy,
+                    fields = centersResourceParameters.Fields,
+                        orderBy = centersResourceParameters.OrderBy,
                         pageNumber = centersResourceParameters.PageNumber - 1,
                         pageSize = centersResourceParameters.PageSize,
                         name = centersResourceParameters.Name,
@@ -189,7 +190,8 @@ namespace EventManager.API.Controllers
             case ResourceUriType.NextPage:
                 return Url.Link ("GetCenters", new
                 {
-                    orderBy = centersResourceParameters.OrderBy,
+                    fields = centersResourceParameters.Fields,
+                        orderBy = centersResourceParameters.OrderBy,
                         pageNumber = centersResourceParameters.PageNumber + 1,
                         pageSize = centersResourceParameters.PageSize,
                         name = centersResourceParameters.Name,
@@ -198,7 +200,8 @@ namespace EventManager.API.Controllers
             default:
                 return Url.Link ("GetCenters", new
                 {
-                    orderBy = centersResourceParameters.OrderBy,
+                    fields = centersResourceParameters.Fields,
+                        orderBy = centersResourceParameters.OrderBy,
                         pageNumber = centersResourceParameters.PageNumber,
                         pageSize = centersResourceParameters.PageSize,
                         name = centersResourceParameters.Name,
