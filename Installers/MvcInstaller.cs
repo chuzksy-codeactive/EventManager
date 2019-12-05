@@ -50,8 +50,12 @@ namespace EventManager.API.Installers
                         ValidateAudience = false
                     };
                 });
-
-            services.AddControllers ()
+            services.AddHttpCacheHeaders ();
+            services.AddResponseCaching ();
+            services.AddControllers (setupAction =>
+                {
+                    setupAction.CacheProfiles.Add ("240SecondsCacheProfile", new CacheProfile () { Duration = 240 });
+                })
                 .AddNewtonsoftJson (setupAction =>
                 {
                     setupAction.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver ();

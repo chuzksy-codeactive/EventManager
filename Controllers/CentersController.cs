@@ -20,6 +20,7 @@ namespace EventManager.API.Controllers
 {
     [ApiController]
     [Route ("api/centers")]
+    [ResponseCache(CacheProfileName = "240SecondsCacheProfile")]
     public class CentersController : ControllerBase
     {
         private readonly ICenterRepository _centerRepository;
@@ -113,6 +114,7 @@ namespace EventManager.API.Controllers
         }
 
         [HttpGet ("{centerId}", Name = "GetCenterById")]
+        [ResponseCache(Duration = 120)]
         public async Task<IActionResult> GetCenterById (Guid centerId, string fields, [FromHeader (Name = "Accept")] string mediaType)
         {
             if (!MediaTypeHeaderValue.TryParse (mediaType, out MediaTypeHeaderValue parsedMediaType))
