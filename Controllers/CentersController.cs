@@ -268,11 +268,11 @@ namespace EventManager.API.Controllers
                     "delete_center",
                     "DELETE"));
             links.Add (
-                new LinkDto (Url.Link ("CreateCenter", null),
+                new LinkDto (Url.Link ("CreateCenter", new {}),
                     "create_center",
                     "POST"));
             links.Add (
-                new LinkDto (Url.Link ("GetCenters", null),
+                new LinkDto (Url.Link ("GetCenters", new {}),
                     "centers",
                     "GET"));
 
