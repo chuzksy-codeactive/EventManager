@@ -54,7 +54,7 @@ namespace EventManager.API
             });
 
             app.UseHttpsRedirection ();
-            // app.UseResponseCaching ();
+            app.UseResponseCaching ();
             app.UseHttpCacheHeaders ();
             app.UseStaticFiles ();
 

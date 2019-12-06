@@ -12,6 +12,8 @@ using EventManager.API.Models;
 using EventManager.API.ResourceParameters;
 using EventManager.API.Services;
 
+using Marvin.Cache.Headers;
+
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
@@ -44,11 +46,12 @@ namespace EventManager.API.Controllers
         }
 
         [HttpGet (Name = "GetCenters")]
+        [ResponseCache (Duration = 120)]
         public IActionResult GetCenters ([FromQuery] CentersResourceParameters centersResourceParameters, [FromHeader (Name = "Accept")] string mediaType)
         {
             if (!MediaTypeHeaderValue.TryParse (mediaType, out MediaTypeHeaderValue parsedMediaType))
             {
-                return BadRequest (new 
+                return BadRequest (new
                 {
                     message = "Accept header mediaType is not allowed"
                 });
@@ -100,7 +103,7 @@ namespace EventManager.API.Controllers
                 return Ok (linkedCollectionResource);
             }
 
-            return Ok(shapeCenters);
+            return Ok (shapeCenters);
         }
 
         [HttpPost (Name = "CreateCenter")]
@@ -127,6 +130,8 @@ namespace EventManager.API.Controllers
         }
 
         [HttpGet ("{centerId}", Name = "GetCenterById")]
+        [HttpCacheExpiration (CacheLocation = CacheLocation.Public, MaxAge = 1000)]
+        [HttpCacheValidation (MustRevalidate = false)]
         public async Task<IActionResult> GetCenterById (Guid centerId, string fields, [FromHeader (Name = "Accept")] string mediaType)
         {
             if (!MediaTypeHeaderValue.TryParse (mediaType, out MediaTypeHeaderValue parsedMediaType))

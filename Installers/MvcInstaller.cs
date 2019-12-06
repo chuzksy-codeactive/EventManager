@@ -64,7 +64,6 @@ namespace EventManager.API.Installers
             services.AddControllers (setupAction =>
                 {
                     setupAction.ReturnHttpNotAcceptable = true;
-                    setupAction.CacheProfiles.Add ("240SecondsCacheProfile", new CacheProfile () { Duration = 240 });
                 })
                 .AddNewtonsoftJson (setupAction =>
                 {
