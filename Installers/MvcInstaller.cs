@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 
 using AutoMapper;
 
@@ -50,16 +51,26 @@ namespace EventManager.API.Installers
                         ValidateAudience = false
                     };
                 });
-            services.AddHttpCacheHeaders ();
+            services.AddHttpCacheHeaders ((expirationModelOptions) =>
+                {
+                    expirationModelOptions.MaxAge = 60;
+                    expirationModelOptions.CacheLocation = Marvin.Cache.Headers.CacheLocation.Private;
+                },
+                (validationModelOptions) =>
+                {
+                    validationModelOptions.MustRevalidate = true;
+                });
             services.AddResponseCaching ();
             services.AddControllers (setupAction =>
                 {
+                    setupAction.ReturnHttpNotAcceptable = true;
                     setupAction.CacheProfiles.Add ("240SecondsCacheProfile", new CacheProfile () { Duration = 240 });
                 })
                 .AddNewtonsoftJson (setupAction =>
                 {
                     setupAction.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver ();
-                });
+                })
+                .AddXmlDataContractSerializerFormatters ();
             services.AddSwaggerGen (sw =>
             {
                 sw.SwaggerDoc ("v1", new OpenApiInfo

@@ -20,7 +20,6 @@ namespace EventManager.API.Controllers
 {
     [ApiController]
     [Route ("api/centers")]
-    [ResponseCache(CacheProfileName = "240SecondsCacheProfile")]
     public class CentersController : ControllerBase
     {
         private readonly ICenterRepository _centerRepository;
@@ -45,8 +44,16 @@ namespace EventManager.API.Controllers
         }
 
         [HttpGet (Name = "GetCenters")]
-        public IActionResult GetCenters ([FromQuery] CentersResourceParameters centersResourceParameters)
+        public IActionResult GetCenters ([FromQuery] CentersResourceParameters centersResourceParameters, [FromHeader (Name = "Accept")] string mediaType)
         {
+            if (!MediaTypeHeaderValue.TryParse (mediaType, out MediaTypeHeaderValue parsedMediaType))
+            {
+                return BadRequest (new 
+                {
+                    message = "Accept header mediaType is not allowed"
+                });
+            }
+
             if (!_propertyMappingService.ValidMappingExistsFor<CenterDto, Center> (centersResourceParameters.OrderBy))
             {
                 return BadRequest ();
@@ -71,23 +78,29 @@ namespace EventManager.API.Controllers
 
             var links = CreateLinksForCenters (centersResourceParameters, centers.HasNext, centers.HasPrevious);
             var shapeCenters = _mapper.Map<IEnumerable<CenterDto>> (centers).ShapeData (centersResourceParameters.Fields);
-            var shapeCentersWithLinks = shapeCenters.Select (center =>
+
+            if (parsedMediaType.MediaType == "application/vnd.marvin.hateoas+json")
             {
-                var centerAsDictionary = center as IDictionary<string, object>;
-                var centerLinks = CreateLinksForCenter ((Guid) centerAsDictionary["CenterId"], null);
+                var shapeCentersWithLinks = shapeCenters.Select (center =>
+                {
+                    var centerAsDictionary = center as IDictionary<string, object>;
+                    var centerLinks = CreateLinksForCenter ((Guid) centerAsDictionary["CenterId"], null);
 
-                centerAsDictionary.Add ("links", centerLinks);
+                    centerAsDictionary.Add ("links", centerLinks);
 
-                return centerAsDictionary;
-            });
+                    return centerAsDictionary;
+                });
 
-            var linkedCollectionResource = new
-            {
-                value = shapeCentersWithLinks,
-                links,
-            };
+                var linkedCollectionResource = new
+                {
+                    value = shapeCentersWithLinks,
+                    links,
+                };
 
-            return Ok (linkedCollectionResource);
+                return Ok (linkedCollectionResource);
+            }
+
+            return Ok(shapeCenters);
         }
 
         [HttpPost (Name = "CreateCenter")]
@@ -114,7 +127,6 @@ namespace EventManager.API.Controllers
         }
 
         [HttpGet ("{centerId}", Name = "GetCenterById")]
-        [ResponseCache(Duration = 120)]
         public async Task<IActionResult> GetCenterById (Guid centerId, string fields, [FromHeader (Name = "Accept")] string mediaType)
         {
             if (!MediaTypeHeaderValue.TryParse (mediaType, out MediaTypeHeaderValue parsedMediaType))

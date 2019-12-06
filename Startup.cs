@@ -24,7 +24,7 @@ namespace EventManager.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices (IServiceCollection services)
         {
-            services.InstallServicesInAssembly(Configuration);
+            services.InstallServicesInAssembly (Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,14 +54,14 @@ namespace EventManager.API
             });
 
             app.UseHttpsRedirection ();
-            app.UseResponseCaching();
-            app.UseHttpCacheHeaders();
+            // app.UseResponseCaching ();
+            app.UseHttpCacheHeaders ();
             app.UseStaticFiles ();
 
             app.UseRouting ();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            app.UseAuthentication ();
+            app.UseAuthorization ();
 
             app.UseEndpoints (endpoints =>
             {
