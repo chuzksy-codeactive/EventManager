@@ -16,6 +16,7 @@ namespace EventManager.API.Installers
                     configuration.GetConnectionString ("DefaultConnection")));
             services.AddScoped<IUserRepository, UserRepository> ();
             services.AddScoped<ICenterRepository, CenterRepository> ();
+            services.AddScoped<IEventRepository, EventRepository> ();
         }
     }
 }

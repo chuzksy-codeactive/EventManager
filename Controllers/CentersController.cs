@@ -55,7 +55,7 @@ namespace EventManager.API.Controllers
                 {
                     message = "Accept header mediaType is not allowed"
                 });
-            }
+            } 
 
             if (!_propertyMappingService.ValidMappingExistsFor<CenterDto, Center> (centersResourceParameters.OrderBy))
             {

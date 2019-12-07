@@ -11,11 +11,20 @@ namespace EventManager.API.Services
         private readonly Dictionary<string, PropertyMappingValue> _centerPropertyMapping = new
         Dictionary<string, PropertyMappingValue> (StringComparer.OrdinalIgnoreCase)
         { 
-            { "CenterId", new PropertyMappingValue (new List<string> () { "CenterId" }) }, 
+            { "CenterId", new PropertyMappingValue (new List<string> () { "CenterId" }) } 
+            ,{ "Name", new PropertyMappingValue (new List<string> () { "Name" }) }
+            ,{ "HallCapacity", new PropertyMappingValue (new List<string> () { "HallCapacity" }) }
+            ,{ "Location", new PropertyMappingValue (new List<string> () { "Location" }) } 
+            ,{ "Price", new PropertyMappingValue (new List<string> () { "Price" }) }
+        };
+
+        private readonly Dictionary<string, PropertyMappingValue> _eventPropertyMapping = new
+        Dictionary<string, PropertyMappingValue> (StringComparer.OrdinalIgnoreCase)
+        { 
+            { "EventId", new PropertyMappingValue (new List<string> () { "EventId" }) }, 
             { "Name", new PropertyMappingValue (new List<string> () { "Name" }) }, 
-            { "HallCapacity", new PropertyMappingValue (new List<string> () { "HallCapacity" }) }, 
-            { "Location", new PropertyMappingValue (new List<string> () { "Location" }) }, 
-            { "Price", new PropertyMappingValue (new List<string> () { "Price" }) }
+            { "Purpose", new PropertyMappingValue (new List<string> () { "Purpose" }) }, 
+            { "Note", new PropertyMappingValue (new List<string> () { "Note" }) }, 
         };
 
         private readonly IList<IPropertyMapping> _propertyMappings = new List<IPropertyMapping> ();
@@ -23,6 +32,7 @@ namespace EventManager.API.Services
         public PropertyMappingService ()
         {
             _propertyMappings.Add (new PropertyMapping<CenterDto, Center> (_centerPropertyMapping));
+            _propertyMappings.Add(new PropertyMapping<EventDto, Event>(_eventPropertyMapping));
         }
 
         public bool ValidMappingExistsFor<TSource, TDestination> (string fields)
