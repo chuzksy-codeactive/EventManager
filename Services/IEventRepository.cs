@@ -12,6 +12,8 @@ namespace EventManager.API.Services
         PagedList<Event> GetEvents (EventsResourceParameters eventsResourceParameters);
         void AddEvent (Event eventToAdd);
         Task<Event> GetEventByIdAsync (Guid eventId);
+        Task<bool> CheckIfEventExistForCenterAsync(Guid centerId, DateTimeOffset eventDate); 
+        Task<bool> CheckIfEventExistForCenterAsync(Guid centerId, Guid eventId, DateTimeOffset eventDate); 
         void UpdateEvent (Event eventToUpdate);
         void DeleteEvent (Event eventToDelete);
         Task<bool> SaveChangesAsync ();

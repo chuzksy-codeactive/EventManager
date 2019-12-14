@@ -35,21 +35,6 @@ namespace EventManager.API.Services
             _dataContext.Add (eventToAdd);
         }
 
-        public void DeleteEvent (Event eventToDelete)
-        {
-            throw new NotImplementedException ();
-        }
-
-        public Task<Event> GetEventByIdAsync (Guid eventId)
-        {
-            throw new NotImplementedException ();
-        }
-
-        public async Task<IEnumerable<Event>> GetEventsAsync ()
-        {
-            return await _dataContext.Events.ToListAsync ();
-        }
-
         public PagedList<Event> GetEvents (EventsResourceParameters eventsResourceParameters)
         {
             if (eventsResourceParameters == null)
@@ -82,14 +67,41 @@ namespace EventManager.API.Services
             return PagedList<Event>.Create (events, eventsResourceParameters.PageNumber, eventsResourceParameters.PageSize);
         }
 
-        public Task<bool> SaveChangesAsync ()
+        public async Task<Event> GetEventByIdAsync (Guid eventId)
+        {
+            return await _dataContext.Events.FindAsync (eventId);
+        }
+
+        public async Task<IEnumerable<Event>> GetEventsAsync ()
+        {
+            return await _dataContext.Events.ToListAsync ();
+        }
+
+        public async Task<bool> SaveChangesAsync ()
+        {
+            return (await _dataContext.SaveChangesAsync () > 0);
+        }
+
+        public async Task<bool> CheckIfEventExistForCenterAsync(Guid centerId, DateTimeOffset eventDate)
+        {
+            return await _dataContext.Events.AnyAsync(x => x.CenterId == centerId && x.ScheduledDate == eventDate.Date.ToShortDateString());
+        }
+
+        public async Task<bool> CheckIfEventExistForCenterAsync(Guid centerId, Guid eventId, DateTimeOffset eventDate)
+        {
+            return await _dataContext.Events.AnyAsync(x => x.CenterId == centerId 
+                && x.ScheduledDate == eventDate.Date.ToShortDateString()
+                && x.Id != eventId);
+        }
+
+        public void DeleteEvent (Event eventToDelete)
         {
             throw new NotImplementedException ();
         }
 
         public void UpdateEvent (Event eventToUpdate)
         {
-            throw new NotImplementedException ();
+            // no code in this implementation
         }
 
         public void Dispose ()

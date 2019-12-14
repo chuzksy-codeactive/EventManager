@@ -10,6 +10,7 @@ using AutoMapper;
 using EventManager.API.Domain.Entities;
 using EventManager.API.Models;
 using EventManager.API.Services;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -47,7 +48,9 @@ namespace EventManager.API.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> CreateUser ([FromBody] UserForCreationDto userForCreation)
         {
-            if (_userRepository.UserExistsAsync (userForCreation.Username, userForCreation.Email))
+            var userExist = await _userRepository.UserExistsAsync (userForCreation.Username, userForCreation.Email);
+            
+            if (userExist)
             {
                 return BadRequest ("User already exists in the database");
             }
@@ -97,7 +100,7 @@ namespace EventManager.API.Controllers
 
             return Ok (userToReturn);
         }
-        
+
         [HttpGet ("{userId}", Name = "GetUserById")]
         public async Task<IActionResult> GetUserById (Guid userId)
         {
@@ -111,7 +114,7 @@ namespace EventManager.API.Controllers
 
             var user = await _userRepository.GetUserByIdAsync (userId);
 
-            if (user == null) return NotFound();
+            if (user == null) return NotFound ();
 
             var userToReturn = _mapper.Map<UserDto> (user);
 

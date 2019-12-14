@@ -61,9 +61,9 @@ namespace EventManager.API.Services
             return (await _dataContext.SaveChangesAsync () > 0);
         }
 
-        public bool UserExistsAsync (string username, string email)
+        public async Task<bool> UserExistsAsync (string username, string email)
         {
-            return _dataContext.Users.Any (u => u.Username == username || u.Email == email);
+            return await _dataContext.Users.AnyAsync (u => u.Username == username || u.Email == email);
         }
 
         public void Dispose ()

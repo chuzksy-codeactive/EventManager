@@ -9,6 +9,8 @@ namespace EventManager.API.Profiles
         public EventsProfile()
         {
             CreateMap<Event, EventDto>();
+            CreateMap<EventForCreationDto, Event>();
+            CreateMap<EventForUpdateDto, Event>();
         }
     }
 }

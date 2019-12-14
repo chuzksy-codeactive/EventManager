@@ -25,18 +25,26 @@ namespace EventManager.API.Controllers
     public class CentersController : ControllerBase
     {
         private readonly ICenterRepository _centerRepository;
+        private readonly IEventRepository _eventRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
         private readonly IPropertyMappingService _propertyMappingService;
         private readonly IPropertyCheckerService _propertyCheckerService;
 
         public CentersController (
             ICenterRepository centerRepository,
+            IEventRepository eventRepository,
+            IUserRepository userRepository,
             IMapper mapper,
             IPropertyCheckerService propertyCheckerService,
             IPropertyMappingService propertyMappingService)
         {
             _centerRepository = centerRepository ??
                 throw new ArgumentNullException (nameof (centerRepository));
+            _eventRepository = eventRepository ??
+                throw new ArgumentNullException (nameof (eventRepository));
+            _userRepository = userRepository ??
+                throw new ArgumentNullException (nameof (userRepository));
             _mapper = mapper ??
                 throw new ArgumentNullException (nameof (mapper));
             _propertyMappingService = propertyMappingService ??
@@ -55,7 +63,7 @@ namespace EventManager.API.Controllers
                 {
                     message = "Accept header mediaType is not allowed"
                 });
-            } 
+            }
 
             if (!_propertyMappingService.ValidMappingExistsFor<CenterDto, Center> (centersResourceParameters.OrderBy))
             {
@@ -111,7 +119,10 @@ namespace EventManager.API.Controllers
         {
             if (_centerRepository.CenterExists (centerForCreation.Name))
             {
-                return BadRequest ("Center already exists in the database");
+                return Conflict (new
+                {
+                    message = "Center already exists in the database"
+                });
             }
 
             var center = _mapper.Map<Center> (centerForCreation);
@@ -143,7 +154,7 @@ namespace EventManager.API.Controllers
             {
                 return BadRequest (new
                 {
-                    message = "User Id should not be null or empty!"
+                    message = "Center Id should not be null or empty!"
                 });
             }
 
@@ -235,6 +246,67 @@ namespace EventManager.API.Controllers
             await _centerRepository.SaveChangesAsync ();
 
             return NoContent ();
+        }
+
+        [HttpPost ("{centerId}/event")]
+        public async Task<IActionResult> GetEventsForCenter (Guid centerId, [FromBody] EventForCreationDto eventForCreationDto)
+        {
+            var centerExist = await _centerRepository.GetCenterByIdAsync (centerId);
+            var userExist = await _userRepository.GetUserByIdAsync (eventForCreationDto.UserId);
+
+            if (DateTimeOffset.TryParse (eventForCreationDto.ScheduledDate, out var parsedDate))
+            {
+                if (parsedDate.Date <= DateTimeOffset.Now.Date)
+                {
+                    return BadRequest (new
+                    {
+                        message = "Event can't be scheduled on or before this day"
+                    });
+                }
+
+                var eventExist = await _eventRepository.CheckIfEventExistForCenterAsync (centerId, parsedDate);
+
+                if (eventExist)
+                {
+                    return Conflict (new
+                    {
+                        message = $"An existing event was already scheduled for this center on this day."
+                    });
+                }
+            }
+            else
+            {
+                return BadRequest (new
+                {
+                    message = "Event date is not in correct format"
+                });
+            }
+
+            if (centerExist == null)
+            {
+                return NotFound (new
+                {
+                    message = "Center is not found"
+                });
+            }
+
+            if (userExist == null)
+            {
+                return NotFound (new
+                {
+                    message = $"User with Id: {eventForCreationDto.UserId} does not exist"
+                });
+            }
+
+            var eventEntity = _mapper.Map<Event> (eventForCreationDto);
+            eventEntity.CenterId = centerId;
+
+            _eventRepository.AddEvent (eventEntity);
+            await _eventRepository.SaveChangesAsync ();
+
+            var eventToReturn = _mapper.Map<EventDto> (eventEntity);
+
+            return Ok (eventToReturn);
         }
 
         private string CreateCenterResourceUri (CentersResourceParameters centersResourceParameters, ResourceUriType type)

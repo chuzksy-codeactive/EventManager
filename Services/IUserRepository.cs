@@ -9,7 +9,7 @@ namespace EventManager.API.Services
     public interface IUserRepository
     {
         Task<bool> SaveChangesAsync ();
-        bool UserExistsAsync(string username, string email);
+        Task<bool> UserExistsAsync(string username, string email);
         Task<IEnumerable<User>> GetUsersAsync ();
         void AddUser (User user);
         Task<User> AuthenticateUserAsync (string username, string password);

@@ -102,6 +102,93 @@ namespace EventManager.API.Controllers
             return Ok (shapeEvents);
         }
 
+        [HttpGet ("{eventId}", Name = "GetEventById")]
+        public async Task<IActionResult> GetEventById (Guid eventId, string fields, [FromHeader (Name = "Accept")] string mediaType)
+        {
+            if (!MediaTypeHeaderValue.TryParse (mediaType, out MediaTypeHeaderValue parsedMediaType))
+            {
+                return BadRequest ();
+            }
+
+            if (string.IsNullOrWhiteSpace (eventId.ToString ()))
+            {
+                return BadRequest (new
+                {
+                    message = "Event Id should not be null or empty!"
+                });
+            }
+
+            if (!_propertyCheckerService.TypeHasProperties<CenterDto> (fields))
+            {
+                return BadRequest ();
+            }
+
+            var eventEntity = await _eventRepository.GetEventByIdAsync (eventId);
+
+            if (eventEntity == null)
+            {
+                return NotFound ();
+            }
+
+            if (parsedMediaType.MediaType == "application/vnd.marvin.hateoas+json")
+            {
+                var links = CreateLinksForEvent (eventId, fields);
+
+                var linkedResourceToReturn = _mapper.Map<EventDto> (eventEntity).ShapeData (fields) as IDictionary<string, object>;
+
+                linkedResourceToReturn.Add ("links", links);
+
+                return Ok (linkedResourceToReturn);
+            }
+
+            return Ok (_mapper.Map<CenterDto> (eventEntity).ShapeData (fields));
+        }
+
+        [HttpPut ("{eventId}")]
+        public async Task<IActionResult> UpdateEvent (Guid centerId, Guid eventId, EventForUpdateDto eventForUpdate)
+        {
+            var eventEntity = await _eventRepository.GetEventByIdAsync (eventId);
+
+            if (eventEntity == null)
+            {
+                return NotFound ();
+            }
+
+            if (DateTimeOffset.TryParse (eventForUpdate.ScheduledDate, out var parsedDate))
+            {
+                if (parsedDate.Date <= DateTimeOffset.Now.Date)
+                {
+                    return BadRequest (new
+                    {
+                        message = "Event can't be scheduled on or before this day"
+                    });
+                }
+
+                var eventExist = await _eventRepository.CheckIfEventExistForCenterAsync (centerId, eventId, parsedDate);
+
+                if (eventExist)
+                {
+                    return Conflict (new
+                    {
+                        message = $"An existing event was already scheduled for this center on this day."
+                    });
+                }
+            }
+            else
+            {
+                return BadRequest (new
+                {
+                    message = "Event date is not in correct format"
+                });
+            }
+
+            _mapper.Map (eventForUpdate, eventEntity);
+
+            _eventRepository.UpdateEvent (eventEntity);
+            await _eventRepository.SaveChangesAsync ();
+
+            return NoContent ();
+        }
         private string CreateEventResourceUri (EventsResourceParameters eventsResourceParameters, ResourceUriType type)
         {
             switch (type)
