@@ -189,6 +189,23 @@ namespace EventManager.API.Controllers
 
             return NoContent ();
         }
+
+        [HttpDelete("{centerId}", Name = "DeleteEvent")]
+        public async Task<IActionResult> DeleteEvent (Guid eventId)
+        {
+            var eventEntity = await _eventRepository.GetEventByIdAsync(eventId);
+
+            if(eventEntity == null)
+            {
+                return NotFound();
+            }
+
+            _eventRepository.DeleteEvent(eventEntity);
+            await _eventRepository.SaveChangesAsync();
+
+            return NoContent();
+        }
+
         private string CreateEventResourceUri (EventsResourceParameters eventsResourceParameters, ResourceUriType type)
         {
             switch (type)

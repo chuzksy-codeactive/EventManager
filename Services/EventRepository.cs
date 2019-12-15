@@ -96,7 +96,7 @@ namespace EventManager.API.Services
 
         public void DeleteEvent (Event eventToDelete)
         {
-            throw new NotImplementedException ();
+            _dataContext.Remove(eventToDelete);
         }
 
         public void UpdateEvent (Event eventToUpdate)

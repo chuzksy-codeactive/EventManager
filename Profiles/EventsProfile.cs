@@ -11,6 +11,7 @@ namespace EventManager.API.Profiles
             CreateMap<Event, EventDto>();
             CreateMap<EventForCreationDto, Event>();
             CreateMap<EventForUpdateDto, Event>();
+            CreateMap<Event, EventForUpdateDto> ();
         }
     }
 }
