@@ -16,17 +16,21 @@ namespace EventManager.API.Controllers
             // create links for root
             var links = new List<LinkDto>
             {
-            new LinkDto (Url.Link ("GetRoot", new {}),
-            "self",
-            "GET"),
+                new LinkDto (Url.Link ("GetRoot", new {}),
+                "self",
+                "GET"),
 
-            new LinkDto (Url.Link ("GetCenters", new {}),
-            "centers",
-            "GET"),
+                new LinkDto (Url.Link ("GetCenters", new {}),
+                "centers",
+                "GET"),
 
-            new LinkDto (Url.Link ("CreateCenter", new {}),
-            "create_centers",
-            "POST")
+                new LinkDto (Url.Link ("CreateCenter", new {}),
+                "create_centers",
+                "POST"),
+
+                new LinkDto (Url.Link ("GetEvents", new {}),
+                "events",
+                "GET")
             };
 
             return Ok (links);

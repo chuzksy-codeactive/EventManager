@@ -83,7 +83,7 @@ namespace EventManager.API.Controllers
                 var shapeEventsWithLinks = shapeEvents.Select (evt =>
                 {
                     var eventAsDictionary = evt as IDictionary<string, object>;
-                    var eventLinks = CreateLinksForEvent ((Guid) eventAsDictionary["EventId"], null);
+                    var eventLinks = CreateLinksForEvent ((Guid) eventAsDictionary["Id"], null);
 
                     eventAsDictionary.Add ("links", eventLinks);
 
@@ -141,11 +141,11 @@ namespace EventManager.API.Controllers
                 return Ok (linkedResourceToReturn);
             }
 
-            return Ok (_mapper.Map<CenterDto> (eventEntity).ShapeData (fields));
+            return Ok (_mapper.Map<EventDto> (eventEntity).ShapeData (fields));
         }
 
         [HttpPut ("{eventId}")]
-        public async Task<IActionResult> UpdateEvent (Guid centerId, Guid eventId, EventForUpdateDto eventForUpdate)
+        public async Task<IActionResult> UpdateEvent (Guid centerId, Guid eventId, [FromBody] EventForUpdateDto eventForUpdate)
         {
             var eventEntity = await _eventRepository.GetEventByIdAsync (eventId);
 
@@ -190,20 +190,20 @@ namespace EventManager.API.Controllers
             return NoContent ();
         }
 
-        [HttpDelete("{centerId}", Name = "DeleteEvent")]
+        [HttpDelete ("{eventId}", Name = "DeleteEvent")]
         public async Task<IActionResult> DeleteEvent (Guid eventId)
         {
-            var eventEntity = await _eventRepository.GetEventByIdAsync(eventId);
+            var eventEntity = await _eventRepository.GetEventByIdAsync (eventId);
 
-            if(eventEntity == null)
+            if (eventEntity == null)
             {
-                return NotFound();
+                return NotFound ();
             }
 
-            _eventRepository.DeleteEvent(eventEntity);
-            await _eventRepository.SaveChangesAsync();
+            _eventRepository.DeleteEvent (eventEntity);
+            await _eventRepository.SaveChangesAsync ();
 
-            return NoContent();
+            return NoContent ();
         }
 
         private string CreateEventResourceUri (EventsResourceParameters eventsResourceParameters, ResourceUriType type)
@@ -266,10 +266,6 @@ namespace EventManager.API.Controllers
                 new LinkDto (Url.Link ("DeleteEvent", new { eventId }),
                     "delete_event",
                     "DELETE"));
-            links.Add (
-                new LinkDto (Url.Link ("CreateEvent", new {}),
-                    "create_event",
-                    "POST"));
             links.Add (
                 new LinkDto (Url.Link ("GetEvents", new {}),
                     "events",

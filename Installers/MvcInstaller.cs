@@ -113,6 +113,7 @@ namespace EventManager.API.Installers
             services.AddTransient<IValidator<UserForCreationDto>, UserForCreationDtoValidator> ();
             services.AddTransient<IValidator<AuthenticateUserDto>, AuthenticateUserDtoValidator> ();
             services.AddTransient<IValidator<CenterForCreationDto>, CenterForCreationDtoValidator> ();
+            services.AddTransient<IValidator<EventForCreationDto>, EventForCreationDtoValidator> ();
         }
     }
 }

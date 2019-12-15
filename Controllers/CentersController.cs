@@ -248,8 +248,8 @@ namespace EventManager.API.Controllers
             return NoContent ();
         }
 
-        [HttpPost ("{centerId}/event")]
-        public async Task<IActionResult> GetEventsForCenter (Guid centerId, [FromBody] EventForCreationDto eventForCreationDto)
+        [HttpPost ("{centerId}/event", Name = "CreateEventsForCenter")]
+        public async Task<IActionResult> CreateEventsForCenter (Guid centerId, [FromBody] EventForCreationDto eventForCreationDto)
         {
             var centerExist = await _centerRepository.GetCenterByIdAsync (centerId);
             var userExist = await _userRepository.GetUserByIdAsync (eventForCreationDto.UserId);
