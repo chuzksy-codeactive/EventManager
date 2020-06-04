@@ -2,13 +2,14 @@ using System;
 using System.Linq;
 
 using EventManager.API.Installers;
-using EventManager.API.Options;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Net.Http.Headers;
 
 namespace EventManager.API
 {
@@ -38,19 +39,22 @@ namespace EventManager.API
             {
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts ();
+                app.UseExceptionHandler(appBuilder =>
+                {
+                    appBuilder.Run(async context =>
+                    {
+                        context.Response.StatusCode = 500;
+                        await context.Response.WriteAsync("An unexpected fault happend. Try again later");
+                    });
+                });
             }
 
-            var swaggerOptions = new SwaggerOptions ();
-            Configuration.GetSection (nameof (SwaggerOptions)).Bind (swaggerOptions);
-
-            app.UseSwagger (option =>
-            {
-                option.RouteTemplate = swaggerOptions.JsonRoute;
-            });
+            app.UseSwagger();
 
             app.UseSwaggerUI (option =>
             {
-                option.SwaggerEndpoint (swaggerOptions.UiEndpoint, swaggerOptions.Description);
+                option.SwaggerEndpoint ("swagger/v1/swagger.json", "Event Manager API V1");
+                option.RoutePrefix = string.Empty;
             });
 
             app.UseHttpsRedirection ();

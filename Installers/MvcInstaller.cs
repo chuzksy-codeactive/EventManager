@@ -8,7 +8,6 @@ using AutoMapper;
 
 using EventManager.API.Domain.Validators;
 using EventManager.API.Models;
-using EventManager.API.Options;
 using EventManager.API.Services;
 
 using FluentValidation;
@@ -30,10 +29,6 @@ namespace EventManager.API.Installers
     {
         public void InstallerServices (IServiceCollection services, IConfiguration configuration)
         {
-            var jwtSettings = new JwtSettings ();
-            configuration.Bind (nameof (jwtSettings), jwtSettings);
-            services.AddSingleton (jwtSettings);
-
             services.AddAuthentication (x =>
                 {
                     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -46,7 +41,7 @@ namespace EventManager.API.Installers
                     x.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey (Encoding.ASCII.GetBytes (jwtSettings.Secret)),
+                        IssuerSigningKey = new SymmetricSecurityKey (Encoding.ASCII.GetBytes (configuration["Secret"])),
                         ValidateIssuer = false,
                         ValidateAudience = false
                     };

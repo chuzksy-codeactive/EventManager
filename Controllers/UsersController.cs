@@ -81,7 +81,7 @@ namespace EventManager.API.Controllers
             }
 
             var tokenHandler = new JwtSecurityTokenHandler ();
-            var key = Encoding.ASCII.GetBytes (_config["JwtSettings:Secret"]);
+            var key = Encoding.ASCII.GetBytes (_config["Secret"]);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity (new Claim[]
