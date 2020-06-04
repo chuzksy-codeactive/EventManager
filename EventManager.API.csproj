@@ -4,8 +4,9 @@
     <TargetFramework>netstandard2.2</TargetFramework>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>aspnet-EventManager.API-0F499951-481E-473C-B121-55D8525CEAF6</UserSecretsId>
-    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
+    <DockerComposeProjectPath>docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
